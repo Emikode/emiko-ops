@@ -66,7 +66,20 @@ def _offline_status(reason: str) -> dict:
     }
 
 
-def get_logs(service: str = "all", lines: int = 20) -> str:
-    """Fetch recent logs from PythonFX. Placeholder until log endpoint exists."""
-    log.info("pythonfx: logs requested for %s (placeholder)", service)
-    return f"[placeholder] No live logs for {service}. Connect PythonFX log endpoint to enable."
+def get_recent_logs(lines: int = 20) -> str:
+    """Fetch recent logs from PythonFX /logs endpoint."""
+    if not PYTHONFX_BASE_URL:
+        return "Logs not yet connected. Set PYTHONFX_BASE_URL."
+
+    url = f"{PYTHONFX_BASE_URL.rstrip('/')}/logs"
+    try:
+        resp = requests.get(url, timeout=REQUEST_TIMEOUT, params={"lines": lines})
+        resp.raise_for_status()
+        data = resp.json()
+        log_lines = data.get("logs", [])
+        if isinstance(log_lines, list):
+            return "\n".join(log_lines) if log_lines else "No recent logs."
+        return str(log_lines)
+    except Exception as e:
+        log.error("pythonfx: failed to fetch logs — %s", e)
+        return "Logs not yet connected."
