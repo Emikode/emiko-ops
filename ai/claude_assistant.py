@@ -11,10 +11,14 @@ import anthropic
 
 from utils.logger import log
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 MODEL = "claude-3-haiku-20240307"
 MAX_TOKENS = 800
 TEMPERATURE = 0.2
+
+
+def _get_api_key() -> str | None:
+    """Read API key at call time, not import time."""
+    return os.getenv("ANTHROPIC_API_KEY")
 
 SYSTEM_PROMPT = (
     "You are Emiko, an AI operations engineer for a Telegram-based control tower. "
@@ -70,11 +74,12 @@ async def ask_claude(
     health_data: dict | None = None,
 ) -> str:
     """Send a message to Claude with system context and conversation history."""
-    if not ANTHROPIC_API_KEY:
+    api_key = _get_api_key()
+    if not api_key:
         return "Claude is not connected. Set ANTHROPIC_API_KEY to enable."
 
     try:
-        client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
+        client = anthropic.AsyncAnthropic(api_key=api_key)
 
         system = SYSTEM_PROMPT + "\n\n" + _build_health_context(health_data)
 
@@ -100,17 +105,18 @@ async def ask_claude(
         log.error("claude: rate limited")
         return "⚠ Rate limited. Try again in a moment."
     except Exception as e:
-        log.error("claude: unexpected error — %s", e)
-        return "⚠ Claude encountered an error. Check logs."
+        log.error("claude: unexpected error — %s: %s", type(e).__name__, e)
+        return f"⚠ Claude error: {type(e).__name__}: {e}"
 
 
 async def analyze_health(health_data: dict) -> tuple[str, list[dict]]:
     """Operator mode — analyze health data and suggest actions."""
-    if not ANTHROPIC_API_KEY:
+    api_key = _get_api_key()
+    if not api_key:
         return "Claude is not connected. Set ANTHROPIC_API_KEY to enable.", []
 
     try:
-        client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
+        client = anthropic.AsyncAnthropic(api_key=api_key)
 
         health_context = _build_health_context(health_data)
         prompt = (
@@ -136,5 +142,5 @@ async def analyze_health(health_data: dict) -> tuple[str, list[dict]]:
         return analysis_text, actions
 
     except Exception as e:
-        log.error("claude: analyze_health error — %s", e)
-        return "⚠ Could not analyze health data. Check logs.", []
+        log.error("claude: analyze_health error — %s: %s", type(e).__name__, e)
+        return f"⚠ Claude error: {type(e).__name__}: {e}", []
