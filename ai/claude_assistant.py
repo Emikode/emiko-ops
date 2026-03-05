@@ -11,7 +11,7 @@ import anthropic
 
 from utils.logger import log
 
-MODEL = "claude-3-haiku-20240307"
+MODEL = "claude-3-5-haiku-20241022"
 MAX_TOKENS = 800
 TEMPERATURE = 0.2
 
