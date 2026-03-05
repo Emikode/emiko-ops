@@ -35,17 +35,23 @@ def systems_menu() -> tuple[str, InlineKeyboardMarkup]:
 
 # ── PythonFX dashboard ──────────────────────────────────────
 
-def pythonfx_dashboard(status: dict, members: dict) -> tuple[str, InlineKeyboardMarkup]:
+def pythonfx_dashboard(status: dict) -> tuple[str, InlineKeyboardMarkup]:
+    error_line = ""
+    if status.get("error"):
+        error_line = f"\n⚠ {status['error']}\n"
+
     text = (
-        "**PythonFX Dashboard**\n\n"
-        f"Forwarder: {status['forwarder']}\n"
-        f"TG Outreach: {status['tg_outreach']}\n"
-        f"IG Outreach: {status['ig_outreach']}\n"
-        f"Education Generator: {status['education_generator']}\n\n"
-        f"Free members: {members['free']}\n"
-        f"VIP members: {members['vip']}"
+        "**PythonFX Dashboard**\n"
+        f"{error_line}\n"
+        f"Forwarder: {status['forwarder_status']}\n"
+        f"Outreach: {status['outreach_status']}\n"
+        f"Signals today: {status['signals_today']}\n"
+        f"Last signal: {status['last_signal_time']}\n\n"
+        f"Free members: {status['free_members']}\n"
+        f"VIP members: {status['vip_members']}"
     )
     buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("Refresh", callback_data="system:pythonfx")],
         [InlineKeyboardButton("Restart Forwarder", callback_data="pfx:restart:forwarder")],
         [InlineKeyboardButton("Restart Outreach", callback_data="pfx:restart:outreach")],
         [InlineKeyboardButton("View Logs", callback_data="pfx:logs")],

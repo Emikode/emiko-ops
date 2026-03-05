@@ -58,31 +58,27 @@ async def on_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     # --- PythonFX dashboard ---
     elif data == "system:pythonfx":
-        status = pythonfx_client.get_status()
-        members = pythonfx_client.get_members()
-        text, buttons = menus.pythonfx_dashboard(status, members)
+        status = pythonfx_client.get_pythonfx_status()
+        text, buttons = menus.pythonfx_dashboard(status)
 
     # --- PythonFX actions ---
     elif data.startswith("pfx:restart:"):
         service = data.split(":")[-1]
         result = railway_client.restart_service(service)
-        status = pythonfx_client.get_status()
-        members = pythonfx_client.get_members()
-        dash_text, buttons = menus.pythonfx_dashboard(status, members)
+        status = pythonfx_client.get_pythonfx_status()
+        dash_text, buttons = menus.pythonfx_dashboard(status)
         text = f"_{result}_\n\n{dash_text}"
 
     elif data == "pfx:logs":
         result = pythonfx_client.get_logs()
-        status = pythonfx_client.get_status()
-        members = pythonfx_client.get_members()
-        dash_text, buttons = menus.pythonfx_dashboard(status, members)
+        status = pythonfx_client.get_pythonfx_status()
+        dash_text, buttons = menus.pythonfx_dashboard(status)
         text = f"`{result}`\n\n{dash_text}"
 
     elif data == "pfx:deploy":
         result = railway_client.deploy_latest()
-        status = pythonfx_client.get_status()
-        members = pythonfx_client.get_members()
-        dash_text, buttons = menus.pythonfx_dashboard(status, members)
+        status = pythonfx_client.get_pythonfx_status()
+        dash_text, buttons = menus.pythonfx_dashboard(status)
         text = f"_{result}_\n\n{dash_text}"
 
     else:
